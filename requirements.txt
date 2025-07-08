@@ -1,4 +1,11 @@
 # Astro Runtime includes the following pre-installed providers packages: https://www.astronomer.io/docs/astro/runtime-image-architecture#provider-packages
+
+# Core dependencies for GenAI DAGs
 fastembed==0.5.1
-apache-airflow-providers-weaviate==3.0.3
-apache-airflow-providers-snowflake==5.8.1
+
+# Airflow Provider Packages for Astro Cloud
+apache-airflow-providers-weaviate>=3.0.0,<4.0.0
+apache-airflow-providers-snowflake>=5.0.0,<6.0.0
+
+# Additional dependencies for Weaviate
+weaviate-client>=4.0.0,<5.0.0
