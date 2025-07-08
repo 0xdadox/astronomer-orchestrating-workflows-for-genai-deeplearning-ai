@@ -5,7 +5,7 @@ from pendulum import datetime
     start_date=datetime(2025, 7, 5),
     schedule=None,  # Manual trigger only
     catchup=False,
-    description="A simple DAG with 4 sequential tasks that add numbers 1, 2, 3, 4",
+    description="🚀 DEPLOYED TO ASTRO CLOUD! A simple DAG with 4 sequential tasks that add numbers 1, 2, 3, 4",
     tags=["practice", "sequential", "sum"]
 )
 def sequential_sum_dag():
