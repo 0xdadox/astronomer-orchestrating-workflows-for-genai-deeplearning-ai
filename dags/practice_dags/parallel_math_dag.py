@@ -2,11 +2,11 @@ from airflow.sdk import dag, task
 from pendulum import datetime
 
 @dag(
-    start_date=datetime(2025, 7, 5),
+    start_date=datetime(2025, 7, 8),
     schedule=None,  # Manual trigger only
     catchup=False,
-    description="A parallel DAG with 4 independent tasks performing different math operations",
-    tags=["practice", "parallel", "math"]
+    description="🎯 ASTRO CLOUD DEPLOYED! Enhanced parallel DAG with 5 independent math operations + summary",
+    tags=["practice", "parallel", "math", "deployed", "enhanced"]
 )
 def parallel_math_dag():
     """
@@ -65,14 +65,63 @@ def parallel_math_dag():
         print(f"🔢 Factorials 1! to 6!: {factorials}")
         return factorials
     
-    # Create task instances - these will run in parallel
+    @task
+    def calculate_fibonacci_sequence() -> list:
+        """Calculate Fibonacci sequence up to 12 numbers - NEW TASK for Astro Cloud!"""
+        fibonacci = [0, 1]
+        
+        for i in range(2, 12):
+            next_fib = fibonacci[i-1] + fibonacci[i-2]
+            fibonacci.append(next_fib)
+            print(f"F({i}) = {next_fib}")
+        
+        print(f"🌟 NEW! Fibonacci sequence (12 numbers): {fibonacci}")
+        return fibonacci
+    
+    @task
+    def summarize_all_results(sum_result: int, multiplication_result: str, 
+                             squares_result: list, factorial_result: dict, 
+                             fibonacci_result: list) -> dict:
+        """🎯 ASTRO CLOUD FEATURE: Summarize all parallel math operations"""
+        print("=" * 60)
+        print("🎯 ASTRO CLOUD DEPLOYMENT - MATH OPERATIONS SUMMARY")
+        print("=" * 60)
+        print(f"📊 Sum 1-10: {sum_result}")
+        print(f"✖️  Multiplication table 5: {len(multiplication_result.split('\\n'))} operations")
+        print(f"2️⃣  Squares calculated: {len(squares_result)} numbers")
+        print(f"❗ Factorials calculated: {len(factorial_result)} numbers")
+        print(f"🌟 NEW! Fibonacci sequence: {len(fibonacci_result)} numbers")
+        print("=" * 60)
+        print("🚀 All operations completed successfully in Astro Cloud!")
+        print("=" * 60)
+        
+        return {
+            "total_operations": 5,
+            "deployment_status": "SUCCESS",
+            "astro_cloud_deploy": True,
+            "results_summary": {
+                "sum_result": sum_result,
+                "squares_count": len(squares_result),
+                "factorials_count": len(factorial_result),
+                "fibonacci_count": len(fibonacci_result)
+            }
+        }
+
+    # Create task instances - first 5 run in parallel
     sum_task = calculate_sum_1_to_10()
     multiplication_task = calculate_multiplication_table_5()
     squares_task = calculate_squares()
     factorial_task = calculate_factorial_series()
+    fibonacci_task = calculate_fibonacci_sequence()  # NEW TASK!
     
-    # No dependencies = parallel execution!
-    # All tasks will start at the same time
+    # Summary task depends on all parallel tasks
+    summary_task = summarize_all_results(
+        sum_task, multiplication_task, squares_task, 
+        factorial_task, fibonacci_task
+    )
+    
+    # Dependencies: All parallel tasks → Summary task
+    [sum_task, multiplication_task, squares_task, factorial_task, fibonacci_task] >> summary_task
 
 # Instantiate the DAG
 parallel_math_dag() 
