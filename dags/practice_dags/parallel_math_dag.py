@@ -5,8 +5,8 @@ from pendulum import datetime
     start_date=datetime(2025, 7, 8),
     schedule=None,  # Manual trigger only
     catchup=False,
-    description="🎯 ASTRO CLOUD DEPLOYED! Enhanced parallel DAG with 5 independent math operations + summary",
-    tags=["practice", "parallel", "math", "deployed", "enhanced"]
+    description="🎯 ASTRO CLOUD DEPLOYED! Enhanced parallel DAG with 5 independent math operations + summary + Worker Queues",
+    tags=["practice", "parallel", "math", "deployed", "enhanced", "worker-queues"]
 )
 def parallel_math_dag():
     """
@@ -14,17 +14,19 @@ def parallel_math_dag():
     All 4 tasks run independently and simultaneously.
     """
     
-    @task
+    @task(queue="default")
     def calculate_sum_1_to_10() -> int:
-        """Calculate the sum of numbers 1 to 10"""
+        """Calculate the sum of numbers 1 to 10 - DEFAULT QUEUE"""
+        print("🔍 Running on DEFAULT worker queue")
         result = sum(range(1, 11))
         print(f"🔢 Sum of 1 to 10: {result}")
         print(f"Calculation: 1+2+3+4+5+6+7+8+9+10 = {result}")
         return result
     
-    @task
+    @task(queue="memory_intensive")
     def calculate_multiplication_table_5() -> str:
-        """Calculate multiplication table of 5 (5x1 to 5x10)"""
+        """Calculate multiplication table of 5 (5x1 to 5x10) - MEMORY INTENSIVE QUEUE"""
+        print("🧠 Running on MEMORY_INTENSIVE worker queue")
         results = []
         for i in range(1, 11):
             product = 5 * i
@@ -35,9 +37,10 @@ def parallel_math_dag():
         print(result_str)
         return result_str
     
-    @task
+    @task(queue="memory_intensive")
     def calculate_squares() -> list:
-        """Calculate squares of numbers 1 to 8"""
+        """Calculate squares of numbers 1 to 8 - MEMORY INTENSIVE QUEUE"""
+        print("🧠 Running on MEMORY_INTENSIVE worker queue")
         squares = []
         for i in range(1, 9):
             square = i ** 2
@@ -47,9 +50,10 @@ def parallel_math_dag():
         print(f"🔢 Squares of 1 to 8: {squares}")
         return squares
     
-    @task
+    @task(queue="cpu_intensive")
     def calculate_factorial_series() -> dict:
-        """Calculate factorials of numbers 1 to 6"""
+        """Calculate factorials of numbers 1 to 6 - CPU INTENSIVE QUEUE"""
+        print("⚡ Running on CPU_INTENSIVE worker queue")
         factorials = {}
         
         def factorial(n):
@@ -65,9 +69,10 @@ def parallel_math_dag():
         print(f"🔢 Factorials 1! to 6!: {factorials}")
         return factorials
     
-    @task
+    @task(queue="cpu_intensive")
     def calculate_fibonacci_sequence() -> list:
-        """Calculate Fibonacci sequence up to 12 numbers - NEW TASK for Astro Cloud!"""
+        """Calculate Fibonacci sequence up to 12 numbers - CPU INTENSIVE QUEUE"""
+        print("⚡ Running on CPU_INTENSIVE worker queue")
         fibonacci = [0, 1]
         
         for i in range(2, 12):
@@ -78,13 +83,21 @@ def parallel_math_dag():
         print(f"🌟 NEW! Fibonacci sequence (12 numbers): {fibonacci}")
         return fibonacci
     
-    @task
+    @task(queue="default")
     def summarize_all_results(sum_result: int, multiplication_result: str, 
                              squares_result: list, factorial_result: dict, 
                              fibonacci_result: list) -> dict:
-        """🎯 ASTRO CLOUD FEATURE: Summarize all parallel math operations"""
+        """🎯 ASTRO CLOUD FEATURE: Summarize all parallel math operations - DEFAULT QUEUE"""
+        print("🔍 Running summary on DEFAULT worker queue")
         print("=" * 60)
         print("🎯 ASTRO CLOUD DEPLOYMENT - MATH OPERATIONS SUMMARY")
+        print("=" * 60)
+        print("🏗️  WORKER QUEUE DISTRIBUTION:")
+        print("   📊 Sum (default queue): ✅")
+        print("   🧠 Multiplication (memory_intensive queue): ✅")
+        print("   🧠 Squares (memory_intensive queue): ✅")
+        print("   ⚡ Factorials (cpu_intensive queue): ✅")
+        print("   ⚡ Fibonacci (cpu_intensive queue): ✅")
         print("=" * 60)
         print(f"📊 Sum 1-10: {sum_result}")
         print(f"✖️  Multiplication table 5: {len(multiplication_result.split('\\n'))} operations")
@@ -93,12 +106,14 @@ def parallel_math_dag():
         print(f"🌟 NEW! Fibonacci sequence: {len(fibonacci_result)} numbers")
         print("=" * 60)
         print("🚀 All operations completed successfully in Astro Cloud!")
+        print("🏗️  Worker queues: DEFAULT, MEMORY_INTENSIVE, CPU_INTENSIVE")
         print("=" * 60)
         
         return {
             "total_operations": 5,
             "deployment_status": "SUCCESS",
             "astro_cloud_deploy": True,
+            "worker_queues_used": ["default", "memory_intensive", "cpu_intensive"],
             "results_summary": {
                 "sum_result": sum_result,
                 "squares_count": len(squares_result),
