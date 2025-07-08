@@ -15,6 +15,31 @@ def _my_callback_func(context):
     )
 
 
+def get_weaviate_client():
+    """Get Weaviate client using either Airflow hook or direct connection"""
+    try:
+        # Try to use Airflow Weaviate hook first
+        from airflow.providers.weaviate.hooks.weaviate import WeaviateHook
+        print("Using Airflow Weaviate Hook")
+        hook = WeaviateHook("my_weaviate_conn")
+        return hook.get_conn()
+    except ImportError:
+        # Fallback to direct weaviate client connection
+        print("Airflow Weaviate Hook not available, using direct client connection")
+        import weaviate
+        import os
+        
+        # Get connection details from environment variables
+        weaviate_url = os.getenv("WEAVIATE_URL", "http://localhost:8081")
+        weaviate_api_key = os.getenv("WEAVIATE_API_KEY", "adminkey")
+        
+        client = weaviate.Client(
+            url=weaviate_url,
+            auth_client_secret=weaviate.AuthApiKey(api_key=weaviate_api_key)
+        )
+        return client
+
+
 @dag(
     start_date=datetime(2025, 6, 1),
     schedule="@hourly",
@@ -30,10 +55,7 @@ def fetch_data():
     @task(retries=5, retry_delay=duration(seconds=2))
     def create_collection_if_not_exists() -> None:
         # print(10/0)
-        from airflow.providers.weaviate.hooks.weaviate import WeaviateHook
-
-        hook = WeaviateHook("my_weaviate_conn")
-        client = hook.get_conn()
+        client = get_weaviate_client()
 
         try:
             existing_collections = client.collections.list_all()
@@ -123,11 +145,9 @@ def fetch_data():
     def load_embeddings_to_vector_db(
         list_of_book_data: list, list_of_description_embeddings: list
     ) -> None:
-        from airflow.providers.weaviate.hooks.weaviate import WeaviateHook
         from weaviate.classes.data import DataObject
 
-        hook = WeaviateHook("my_weaviate_conn")
-        client = hook.get_conn()
+        client = get_weaviate_client()
         
         try:
             collection = client.collections.get(COLLECTION_NAME)
