@@ -20,21 +20,25 @@ def query_data():
         hook = WeaviateHook("my_weaviate_conn")
         client = hook.get_conn()
 
-        embedding_model = TextEmbedding(EMBEDDING_MODEL_NAME)
-        collection = client.collections.get(COLLECTION_NAME)
+        try:
+            embedding_model = TextEmbedding(EMBEDDING_MODEL_NAME)
+            collection = client.collections.get(COLLECTION_NAME)
 
-        query_emb = list(embedding_model.embed([query_str]))[0]
+            query_emb = list(embedding_model.embed([query_str]))[0]
 
-        results = collection.query.near_vector(
-            near_vector=query_emb,
-            limit=1,
-        )
-        for result in results.objects:
-            print(
-                f"You should read: {result.properties['title']} by {result.properties['author']}"
+            results = collection.query.near_vector(
+                near_vector=query_emb,
+                limit=1,
             )
-            print("Description:")
-            print(result.properties["description"])
+            for result in results.objects:
+                print(
+                    f"You should read: {result.properties['title']} by {result.properties['author']}"
+                )
+                print("Description:")
+                print(result.properties["description"])
+        finally:
+            # Properly close the Weaviate connection
+            client.close()
 
     search_vector_db_for_a_book()
 

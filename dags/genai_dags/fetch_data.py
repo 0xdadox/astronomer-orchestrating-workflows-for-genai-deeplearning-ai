@@ -35,14 +35,18 @@ def fetch_data():
         hook = WeaviateHook("my_weaviate_conn")
         client = hook.get_conn()
 
-        existing_collections = client.collections.list_all()
-        existing_collection_names = existing_collections.keys()
+        try:
+            existing_collections = client.collections.list_all()
+            existing_collection_names = existing_collections.keys()
 
-        if COLLECTION_NAME not in existing_collection_names:
-            print(f"Collection {COLLECTION_NAME} does not exist yet. Creating it...")
-            collection = client.collections.create(name=COLLECTION_NAME)
-            print(f"Collection {COLLECTION_NAME} created successfully.")
-            print(f"Collection details: {collection}")
+            if COLLECTION_NAME not in existing_collection_names:
+                print(f"Collection {COLLECTION_NAME} does not exist yet. Creating it...")
+                collection = client.collections.create(name=COLLECTION_NAME)
+                print(f"Collection {COLLECTION_NAME} created successfully.")
+                print(f"Collection details: {collection}")
+        finally:
+            # Properly close the Weaviate connection
+            client.close()
 
     _create_collection_if_not_exists = create_collection_if_not_exists()
 
@@ -124,25 +128,30 @@ def fetch_data():
 
         hook = WeaviateHook("my_weaviate_conn")
         client = hook.get_conn()
-        collection = client.collections.get(COLLECTION_NAME)
+        
+        try:
+            collection = client.collections.get(COLLECTION_NAME)
 
-        for book_data_list, emb_list in zip(
-            list_of_book_data, list_of_description_embeddings
-        ):
-            items = []
+            for book_data_list, emb_list in zip(
+                list_of_book_data, list_of_description_embeddings
+            ):
+                items = []
 
-            for book_data, emb in zip(book_data_list, emb_list):
-                item = DataObject(
-                    properties={
-                        "title": book_data["title"],
-                        "author": book_data["author"],
-                        "description": book_data["description"],
-                    },
-                    vector=emb,
-                )
-                items.append(item)
+                for book_data, emb in zip(book_data_list, emb_list):
+                    item = DataObject(
+                        properties={
+                            "title": book_data["title"],
+                            "author": book_data["author"],
+                            "description": book_data["description"],
+                        },
+                        vector=emb,
+                    )
+                    items.append(item)
 
-            collection.data.insert_many(items)
+                collection.data.insert_many(items)
+        finally:
+            # Properly close the Weaviate connection
+            client.close()
 
     _load_embeddings_to_vector_db = load_embeddings_to_vector_db(
         list_of_book_data=_transform_book_description_files,
